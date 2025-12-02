@@ -36,7 +36,7 @@
 
 1. **Requester**가 Approval Request Service의 `POST /approvals`를 호출하여 결재를 요청합니다.
 2. **Approval Request Service**는 MongoDB에 요청을 저장하고, gRPC를 통해 **Approval Processing Service**에 결재 정보를 전달합니다.
-3. **Approver**가 **Approval Processing Service**의 `POST /process/{approverId}/{requestId}`를 호출하여 승인합니다.
+3. **Approver 3**가 **Approval Processing Service**의 `POST /process/{approverId}/{requestId}`를 호출하여 승인합니다.
 4. **Approval Processing Service**는 gRPC를 통해 **Approval Request Service**로 승인 결과를 전달합니다.
 5. **Approval Request Service**는 MongoDB를 업데이트하고, 다음 결재자가 남아있는지 확인합니다.
 6. 다음 결재자가 남아있다면 (예: Approver 7), gRPC로 결재 정보를 **Approval Processing Service**에 재전달하여 다음 단계를 시작합니다.
@@ -165,6 +165,7 @@ message ApprovalResultResponse {
 Approval Processing Service로부터 `ReturnApprovalResult` 호출을 받으면:
 
 1. 해당 `requestId`의 Document를 찾아 승인/반려 결과(`status`)를 업데이트하고 `updatedAt`을 추가합니다.
+    - {"step": 1, "approverId": 3, "status": "approved", "updatedAt": "2025-01-01T10:23:11Z"}
 
 2. **Status가 "rejected"인 경우:**
    - `finalStatus`를 "rejected"로 변경하고 `updatedAt`을 추가합니다.
@@ -190,7 +191,7 @@ Approval Processing Service로부터 `ReturnApprovalResult` 호출을 받으면:
 
 ```json
 {
-    "7": [
+    "7": [ // 결재자 ID (Approver ID)
         {
             "requestId": 1,
             "requesterId": 1,
@@ -201,11 +202,10 @@ Approval Processing Service로부터 `ReturnApprovalResult` 호출을 받으면:
                 { "step": 2, "approverId": 7, "status": "pending" }
             ]
         }
-    ]
+    ],
+    // ... 다른 결재자 목록
 }
 ```
-
-> 💡 키는 결재자 ID (Approver ID)이며, 값은 해당 결재자에게 할당된 결재 요청 목록입니다.
 
 #### 3.3.2 gRPC 서버 처리 흐름 (`RequestApproval` 호출 수신 시)
 
@@ -237,7 +237,7 @@ Approval Processing Service로부터 `ReturnApprovalResult` 호출을 받으면:
 {
     "requestId": 1,
     "result": "approved",
-    "finalResult": "approved"
+    "finalResult": "approved"  // 최종 승인 완료
 }
 ```
 
@@ -247,8 +247,8 @@ Approval Processing Service로부터 `ReturnApprovalResult` 호출을 받으면:
 {
     "requestId": 1,
     "result": "rejected",
-    "rejectedBy": 7,
-    "finalResult": "rejected"
+    "rejectedBy": 7, // 반려한 결재자 ID
+    "finalResult": "rejected" // 최종 반려
 }
 ```
 
