@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  approval-processing-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: approval-processing-service
+    ports:
+      - "8083:8083"     # REST API
+      - "9090:9090"     # gRPC Server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - GRPC_CLIENT_APPROVAL_REQUEST_SERVICE_ADDRESS=static://approval-request-service:9091
+    networks:
+      - erp-network
+
+networks:
+  erp-network:
+    external: true

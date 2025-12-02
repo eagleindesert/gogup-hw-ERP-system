@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  approval-request-service:
+    build:
+      context: ../..
+      dockerfile: approval-request-service/demo/Dockerfile
+    container_name: approval-request-service
+    ports:
+      - "8082:8082"    # REST API
+      - "9091:9091"    # gRPC Server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/approval_db
+      - EMPLOYEE_SERVICE_URL=http://employee-service:8081
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8084
+      - GRPC_SERVER_PORT=9091
+      - GRPC_CLIENT_APPROVAL_PROCESSING_SERVICE_ADDRESS=static://approval-processing-service:9090
+    depends_on:
+      - mongodb
+    networks:
+      - erp-network
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:6.0
+    container_name: approval-mongodb
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=approval_db
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - erp-network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+
+networks:
+  erp-network:
+    name: erp-network
+    external: true
