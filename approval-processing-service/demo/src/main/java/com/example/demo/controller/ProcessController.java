@@ -27,7 +27,7 @@ public class ProcessController {
      * GET /process/{approverId}
      */
     @GetMapping("/{approverId}")
-    public ResponseEntity<List<PendingApproval>> getPendingApprovals(@PathVariable Long approverId) {
+    public ResponseEntity<List<PendingApproval>> getPendingApprovals(@PathVariable("approverId") Long approverId) {
         log.info("결재 대기 목록 조회 요청: approverId={}", approverId);
         List<PendingApproval> pendingApprovals = service.getPendingApprovals(approverId);
         return ResponseEntity.ok(pendingApprovals);
@@ -39,8 +39,8 @@ public class ProcessController {
      */
     @PostMapping("/{approverId}/{requestId}")
     public ResponseEntity<ProcessResponse> processApproval(
-            @PathVariable Long approverId,
-            @PathVariable Long requestId,
+            @PathVariable("approverId") Long approverId,
+            @PathVariable("requestId") Long requestId,
             @RequestBody ProcessRequest request) {
         log.info("결재 처리 요청: approverId={}, requestId={}, status={}", approverId, requestId, request.getStatus());
         ProcessResponse response = service.processApproval(approverId, requestId, request.getStatus());
