@@ -1,6 +1,20 @@
+# =============================================================
+# Approval Request Service - Docker Compose (단독 실행용)
+# =============================================================
+# 이 파일은 Approval Request Service만 단독으로 실행할 때 사용합니다.
+# 전체 서비스 실행은 루트의 docker-compose.yml을 사용하세요.
+#
+# 실행: docker-compose up -d
+# 중지: docker-compose down
+# 주의: erp-network가 미리 생성되어 있어야 합니다.
+#       docker network create erp-network
+# =============================================================
+
 version: '3.8'
 
 services:
+  # Approval Request Service
+  # 설정은 application-docker.properties에서 관리됨
   approval-request-service:
     build:
       context: ../..
@@ -10,30 +24,40 @@ services:
       - "8082:8082"    # REST API
       - "9091:9091"    # gRPC Server
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/approval_db
-      - EMPLOYEE_SERVICE_URL=http://employee-service:8081
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8084
-      - GRPC_SERVER_PORT=9091
-      - GRPC_CLIENT_APPROVAL_PROCESSING_SERVICE_ADDRESS=static://approval-processing-service:9090
+      # Spring Profile만 지정 (세부 설정은 application-docker.properties)
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - erp-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
+  # MongoDB Database
   mongodb:
-    image: mongo:6.0
-    container_name: approval-mongodb
+    image: mongo:7.0
+    container_name: erp-mongodb
     ports:
       - "27018:27017"
     environment:
-      - MONGO_INITDB_DATABASE=approval_db
+      MONGO_INITDB_DATABASE: erp_approval
     volumes:
       - mongodb_data:/data/db
     networks:
       - erp-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   mongodb_data:

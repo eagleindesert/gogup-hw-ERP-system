@@ -1,20 +1,42 @@
+# =============================================================
+# Approval Processing Service - Docker Compose (단독 실행용)
+# =============================================================
+# 이 파일은 Approval Processing Service만 단독으로 실행할 때 사용합니다.
+# 전체 서비스 실행은 루트의 docker-compose.yml을 사용하세요.
+#
+# 실행: docker-compose up -d
+# 중지: docker-compose down
+# 주의: erp-network가 미리 생성되어 있어야 합니다.
+#       docker network create erp-network
+# =============================================================
+
 version: '3.8'
 
 services:
+  # Approval Processing Service
+  # 설정은 application-docker.properties에서 관리됨
   approval-processing-service:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: approval-processing-service/demo/Dockerfile
     container_name: approval-processing-service
     ports:
       - "8083:8083"     # REST API
       - "9090:9090"     # gRPC Server
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - GRPC_CLIENT_APPROVAL_REQUEST_SERVICE_ADDRESS=static://approval-request-service:9091
+      # Spring Profile만 지정 (세부 설정은 application-docker.properties)
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - erp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 networks:
   erp-network:
+    name: erp-network
     external: true
