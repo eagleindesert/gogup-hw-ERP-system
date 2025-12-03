@@ -86,6 +86,13 @@ public class ApprovalRequestService {
     }
 
     /**
+     * pending 상태인 모든 결재 요청 조회 (gRPC Pull용)
+     */
+    public List<ApprovalRequestDocument> getAllPendingApprovals() {
+        return approvalRequestRepository.findByFinalStatus("in_progress");
+    }
+
+    /**
      * 결재 요청 상세 조회
      */
     public ApprovalResponse getApproval(Long requestId) {
