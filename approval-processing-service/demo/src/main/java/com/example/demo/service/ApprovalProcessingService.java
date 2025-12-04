@@ -35,6 +35,7 @@ public class ApprovalProcessingService {
 
     /**
      * 결재 처리 (승인/반려)
+     * gRPC 전송 성공 후에만 In-Memory 변경 (롤백 패턴)
      */
     public ProcessResponse processApproval(Long approverId, Long requestId, String status) {
         log.info("결재 처리 시작: approverId={}, requestId={}, status={}", approverId, requestId, status);
@@ -52,10 +53,6 @@ public class ApprovalProcessingService {
                 .orElseThrow(() -> new ApprovalNotFoundException(
                         "결재 요청을 찾을 수 없습니다: approverId=" + approverId + ", requestId=" + requestId));
 
-        // In-Memory에서 제거
-        repository.removePendingApproval(approverId, requestId);
-        log.info("결재 대기 목록에서 제거 완료: approverId={}, requestId={}", approverId, requestId);
-
         // 현재 결재자의 step 번호 찾기
         int currentStep = targetApproval.getSteps().stream()
                 .filter(s -> s.getApproverId().equals(approverId) && "pending".equals(s.getStatus()))
@@ -63,9 +60,18 @@ public class ApprovalProcessingService {
                 .map(PendingApproval.StepInfo::getStep)
                 .orElse(1);
 
-        // gRPC로 Approval Request Service에 결과 전송
+        // 1. 먼저 gRPC로 Approval Request Service에 결과 전송 (확정 전)
         String grpcResult = grpcClient.returnApprovalResult(requestId, currentStep, approverId, status);
-        log.info("gRPC 결과 전송 완료: requestId={}, grpcResult={}", requestId, grpcResult);
+        
+        // 2. gRPC 실패 시 In-Memory 변경 없이 예외 발생
+        if ("FAILED".equals(grpcResult)) {
+            log.error("gRPC 전송 실패 - 결재 처리 롤백: requestId={}", requestId);
+            throw new RuntimeException("Request Service 연결 실패. 잠시 후 다시 시도해주세요.");
+        }
+        
+        // 3. gRPC 성공 후에만 In-Memory에서 제거
+        repository.removePendingApproval(approverId, requestId);
+        log.info("결재 처리 완료: approverId={}, requestId={}, grpcResult={}", approverId, requestId, grpcResult);
 
         return ProcessResponse.builder()
                 .requestId(requestId)
