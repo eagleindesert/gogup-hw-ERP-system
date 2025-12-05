@@ -7,7 +7,7 @@ import com.example.demo.document.ApprovalStep;
 import com.example.demo.dto.*;
 import com.example.demo.exception.ApprovalNotFoundException;
 import com.example.demo.exception.InvalidStepOrderException;
-import com.example.demo.grpc.ApprovalProcessingGrpcClient;
+import com.example.demo.kafka.producer.ApprovalRequestProducer;
 import com.example.demo.repository.ApprovalRequestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class ApprovalRequestService {
     private final ApprovalRequestRepository approvalRequestRepository;
     private final EmployeeServiceClient employeeServiceClient;
     private final NotificationServiceClient notificationServiceClient;
-    private final ApprovalProcessingGrpcClient approvalProcessingGrpcClient;
+    private final ApprovalRequestProducer approvalRequestProducer;
 
     /**
      * 결재 요청 생성
@@ -69,9 +69,9 @@ public class ApprovalRequestService {
         approvalRequestRepository.save(document);
         log.info("결재 요청 생성 완료: requestId={}", newRequestId);
 
-        // 7. gRPC로 Approval Processing Service에 전달
-        String grpcResult = approvalProcessingGrpcClient.requestApproval(document);
-        log.info("gRPC 전송 결과: {}", grpcResult);
+        // 7. Kafka로 Approval Processing Service에 전달
+        approvalRequestProducer.sendApprovalRequest(document);
+        log.info("Kafka 메시지 전송 완료: requestId={}", newRequestId);
 
         return newRequestId;
     }
@@ -86,7 +86,7 @@ public class ApprovalRequestService {
     }
 
     /**
-     * pending 상태인 모든 결재 요청 조회 (gRPC Pull용)
+     * pending 상태인 모든 결재 요청 조회 (Kafka Consumer용)
      */
     public List<ApprovalRequestDocument> getAllPendingApprovals() {
         return approvalRequestRepository.findByFinalStatus("in_progress");
@@ -136,14 +136,14 @@ public class ApprovalRequestService {
                 .min(Comparator.comparingInt(ApprovalStep::getStep));
 
         if (nextPendingStep.isPresent()) {
-            // 다음 결재자가 있음 - 저장 후 gRPC로 다시 전달
+            // 다음 결재자가 있음 - 저장 후 Kafka로 다시 전달
             approvalRequestRepository.save(document);
             log.info("다음 결재 단계로 이동: requestId={}, nextStep={}", requestId, nextPendingStep.get().getStep());
 
             // 요청자에게 중간 승인 알림 전송
             sendPartialApprovalNotification(document, step, approverId);
 
-            approvalProcessingGrpcClient.requestApproval(document);
+            approvalRequestProducer.sendApprovalRequest(document);
         } else {
             // 모든 단계 완료 - 최종 승인
             document.setFinalStatus("approved");

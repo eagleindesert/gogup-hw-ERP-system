@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.document.ApprovalRequestDocument;
 import com.example.demo.dto.ApprovalCreateRequest;
 import com.example.demo.dto.ApprovalIdResponse;
 import com.example.demo.dto.ApprovalResponse;
@@ -49,6 +50,17 @@ public class ApprovalController {
             return ResponseEntity.ok(List.of());
         }
         return ResponseEntity.ok(approvals);
+    }
+
+    /**
+     * pending 상태인 결재 요청 목록 조회
+     * GET /approvals/pending
+     * Approval Processing Service에서 서버 시작 시 동기화용으로 호출
+     */
+    @GetMapping("/pending")
+    public ResponseEntity<List<ApprovalRequestDocument>> getPendingApprovals() {
+        List<ApprovalRequestDocument> pendingApprovals = approvalRequestService.getAllPendingApprovals();
+        return ResponseEntity.ok(pendingApprovals);
     }
 
     /**
