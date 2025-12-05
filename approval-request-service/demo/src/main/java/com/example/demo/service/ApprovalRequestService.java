@@ -140,6 +140,9 @@ public class ApprovalRequestService {
             approvalRequestRepository.save(document);
             log.info("다음 결재 단계로 이동: requestId={}, nextStep={}", requestId, nextPendingStep.get().getStep());
 
+            // 요청자에게 중간 승인 알림 전송
+            sendPartialApprovalNotification(document, step, approverId);
+
             approvalProcessingGrpcClient.requestApproval(document);
         } else {
             // 모든 단계 완료 - 최종 승인
@@ -185,6 +188,23 @@ public class ApprovalRequestService {
                 .employeeId(document.getRequesterId())
                 .result("approved")
                 .finalResult("approved")
+                .build();
+        notificationServiceClient.sendNotification(notification);
+    }
+
+    /**
+     * 중간 단계 승인 알림 전송
+     */
+    private void sendPartialApprovalNotification(ApprovalRequestDocument document, int step, Long approverId) {
+        int totalSteps = document.getSteps().size();
+        NotificationRequest notification = NotificationRequest.builder()
+                .requestId(document.getRequestId())
+                .employeeId(document.getRequesterId())
+                .result("approved")
+                .currentStep(step)
+                .totalSteps(totalSteps)
+                .approvedBy(approverId)
+                .finalResult("in_progress")
                 .build();
         notificationServiceClient.sendNotification(notification);
     }

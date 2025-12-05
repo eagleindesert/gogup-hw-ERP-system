@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Employee Service",
+            "request": "launch",
+            "mainClass": "com.example.demo.EmployeeServiceApplication",
+            "projectName": "demo",
+            "cwd": "${workspaceFolder}/employee-service/demo"
+        },
+        {
+            "type": "java",
+            "name": "Approval Request Service",
+            "request": "launch",
+            "mainClass": "com.example.demo.ApprovalRequestServiceApplication",
+            "projectName": "demo",
+            "cwd": "${workspaceFolder}/approval-request-service/demo"
+        },
+        {
+            "type": "java",
+            "name": "Approval Processing Service",
+            "request": "launch",
+            "mainClass": "com.example.demo.ApprovalProcessingServiceApplication",
+            "projectName": "demo",
+            "cwd": "${workspaceFolder}/approval-processing-service/demo"
+        },
+        {
+            "type": "java",
+            "name": "Notification Service",
+            "request": "launch",
+            "mainClass": "com.example.demo.NotificationServiceApplication",
+            "projectName": "demo",
+            "cwd": "${workspaceFolder}/notification-service/demo"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "All Services",
+            "configurations": [
+                "Employee Service",
+                "Approval Request Service",
+                "Approval Processing Service",
+                "Notification Service"
+            ],
+            "stopAll": true
+        }
+    ]
+}

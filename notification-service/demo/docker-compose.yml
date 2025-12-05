@@ -1,0 +1,38 @@
+# =============================================================
+# Notification Service - Docker Compose (단독 실행용)
+# =============================================================
+# 이 파일은 Notification Service만 단독으로 실행할 때 사용합니다.
+# 전체 서비스 실행은 루트의 docker-compose.yml을 사용하세요.
+#
+# 실행: docker-compose up -d
+# 중지: docker-compose down
+# =============================================================
+
+version: '3.8'
+
+services:
+  # Notification Service
+  # 설정은 application-docker.properties에서 관리됨
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - erp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  erp-network:
+    name: erp-network
+    external: true
