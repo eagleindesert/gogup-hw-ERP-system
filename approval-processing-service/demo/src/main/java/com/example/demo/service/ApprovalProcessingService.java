@@ -3,7 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.ProcessResponse;
 import com.example.demo.exception.ApprovalNotFoundException;
 import com.example.demo.exception.InvalidStatusException;
-import com.example.demo.kafka.ApprovalResultProducer;
+import com.example.demo.grpc.ApprovalResultGrpcClient;
 import com.example.demo.model.PendingApproval;
 import com.example.demo.repository.InMemoryApprovalRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ApprovalProcessingService {
 
     private final InMemoryApprovalRepository repository;
-    private final ApprovalResultProducer approvalResultProducer;
+    private final ApprovalResultGrpcClient grpcClient;
 
     /**
      * 특정 결재자의 대기 중인 결재 목록 조회
@@ -35,7 +35,7 @@ public class ApprovalProcessingService {
 
     /**
      * 결재 처리 (승인/반려)
-     * Kafka 메시지 전송 후 In-Memory에서 제거
+     * gRPC 전송 성공 후에만 In-Memory 변경 (롤백 패턴)
      */
     public ProcessResponse processApproval(Long approverId, Long requestId, String status) {
         log.info("결재 처리 시작: approverId={}, requestId={}, status={}", approverId, requestId, status);
@@ -60,13 +60,18 @@ public class ApprovalProcessingService {
                 .map(PendingApproval.StepInfo::getStep)
                 .orElse(1);
 
-        // 1. Kafka로 Approval Request Service에 결과 전송
-        approvalResultProducer.sendApprovalResult(requestId, currentStep, approverId, status);
-        log.info("Kafka 결재 결과 전송: requestId={}, step={}, status={}", requestId, currentStep, status);
+        // 1. 먼저 gRPC로 Approval Request Service에 결과 전송 (확정 전)
+        String grpcResult = grpcClient.returnApprovalResult(requestId, currentStep, approverId, status);
         
-        // 2. In-Memory에서 해당 결재자의 대기 항목 제거
+        // 2. gRPC 실패 시 In-Memory 변경 없이 예외 발생
+        if ("FAILED".equals(grpcResult)) {
+            log.error("gRPC 전송 실패 - 결재 처리 롤백: requestId={}", requestId);
+            throw new RuntimeException("Request Service 연결 실패. 잠시 후 다시 시도해주세요.");
+        }
+        
+        // 3. gRPC 성공 후에만 In-Memory에서 제거
         repository.removePendingApproval(approverId, requestId);
-        log.info("결재 처리 완료: approverId={}, requestId={}", approverId, requestId);
+        log.info("결재 처리 완료: approverId={}, requestId={}, grpcResult={}", approverId, requestId, grpcResult);
 
         return ProcessResponse.builder()
                 .requestId(requestId)

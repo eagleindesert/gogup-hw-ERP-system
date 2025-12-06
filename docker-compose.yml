@@ -57,53 +57,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # Zookeeper (Kafka용)
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: erp-zookeeper
-    restart: unless-stopped
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    networks:
-      - erp-network
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "2181"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-  # Kafka (메시지 브로커)
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: erp-kafka
-    restart: unless-stopped
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    ports:
-      - "29092:29092"
-      - "9092:9092"
-    networks:
-      - erp-network
-    healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-
   # =========================================
   # Application Services
   # =========================================
@@ -131,7 +84,7 @@ services:
       retries: 3
       start_period: 60s
 
-  # Approval Request Service (Spring Boot + MongoDB + Kafka)
+  # Approval Request Service (Spring Boot + MongoDB + gRPC)
   approval-request-service:
     build:
       context: .
@@ -140,13 +93,14 @@ services:
     restart: unless-stopped
     ports:
       - "8082:8082"   # REST API
+      - "9091:9091"   # gRPC Server
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
       mongodb:
         condition: service_healthy
-      kafka:
-        condition: service_healthy
+      #employee-service:
+      #  condition: service_healthy
     networks:
       - erp-network
     healthcheck:
@@ -156,7 +110,7 @@ services:
       retries: 3
       start_period: 60s
 
-  # Approval Processing Service (Spring Boot + Kafka + In-Memory)
+  # Approval Processing Service (Spring Boot + gRPC + In-Memory)
   approval-processing-service:
     build:
       context: .
@@ -165,10 +119,11 @@ services:
     restart: unless-stopped
     ports:
       - "8083:8083"   # REST API
+      - "9090:9090"   # gRPC Server
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      kafka:
+      approval-request-service:
         condition: service_healthy
     networks:
       - erp-network
