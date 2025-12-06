@@ -1,0 +1,76 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: erp-ingress
+  namespace: erp-system
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # WebSocket 지원
+    nginx.ingress.kubernetes.io/websocket-services: "notification-service"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx  # 사용 중인 Ingress Controller에 맞게 수정
+  rules:
+  - host: erp.example.com  # 실제 도메인으로 변경
+    http:
+      paths:
+      # Employee Service
+      - path: /api/employees(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: employee-service
+            port:
+              number: 8081
+      
+      # Approval Request Service
+      - path: /api/approval-requests(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: approval-request-service
+            port:
+              number: 8082
+      
+      # Approval Processing Service
+      - path: /api/approval-processing(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: approval-processing-service
+            port:
+              number: 8083
+      
+      # Notification Service (WebSocket & REST API)
+      - path: /api/notifications(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8084
+      
+      # WebSocket 연결
+      - path: /ws
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8084
+      
+      # Notification 정적 파일 (index.html)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8084
+  # TLS 설정 (선택사항)
+  # tls:
+  # - hosts:
+  #   - erp.example.com
+  #   secretName: erp-tls-secret
