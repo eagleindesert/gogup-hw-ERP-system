@@ -111,6 +111,7 @@ services:
   
   # Employee Service (Spring Boot + MySQL)
   employee-service:
+    image: eagleindesert/employee-service:latest
     build:
       context: ./employee-service/demo
       dockerfile: Dockerfile
@@ -134,6 +135,7 @@ services:
 
   # Approval Request Service (Spring Boot + MongoDB + Kafka)
   approval-request-service:
+    image: eagleindesert/approval-request-service:latest
     build:
       context: .
       dockerfile: ./approval-request-service/demo/Dockerfile
@@ -159,6 +161,7 @@ services:
 
   # Approval Processing Service (Spring Boot + Kafka + In-Memory)
   approval-processing-service:
+    image: eagleindesert/approval-processing-service:latest
     build:
       context: .
       dockerfile: ./approval-processing-service/demo/Dockerfile
@@ -182,6 +185,7 @@ services:
 
   # Notification Service (Spring Boot + WebSocket)
   notification-service:
+    image: eagleindesert/notification-service:latest
     build:
       context: ./notification-service/demo
       dockerfile: Dockerfile
