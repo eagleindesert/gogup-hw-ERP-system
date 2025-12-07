@@ -4,6 +4,7 @@ import com.example.demo.dto.EmployeeCreateRequest;
 import com.example.demo.dto.EmployeeIdResponse;
 import com.example.demo.dto.EmployeeResponse;
 import com.example.demo.dto.EmployeeUpdateRequest;
+import com.example.demo.dto.OrgChartResponse;
 import com.example.demo.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -84,5 +85,67 @@ public class EmployeeController {
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ==================== 조직도 관련 API ====================
+
+    /**
+     * 전체 조직도 조회
+     * GET /employees/org-chart
+     */
+    @GetMapping("/org-chart")
+    public ResponseEntity<List<OrgChartResponse>> getOrgChart() {
+        List<OrgChartResponse> orgChart = employeeService.getOrgChart();
+        return ResponseEntity.ok(orgChart);
+    }
+
+    /**
+     * 특정 직원을 루트로 하는 조직도 조회
+     * GET /employees/{id}/org-chart
+     */
+    @GetMapping("/{id}/org-chart")
+    public ResponseEntity<OrgChartResponse> getOrgChartByRoot(@PathVariable Long id) {
+        OrgChartResponse orgChart = employeeService.getOrgChartByRoot(id);
+        return ResponseEntity.ok(orgChart);
+    }
+
+    /**
+     * 특정 직원의 부하 직원 목록 조회
+     * GET /employees/{id}/subordinates
+     */
+    @GetMapping("/{id}/subordinates")
+    public ResponseEntity<List<EmployeeResponse>> getSubordinates(@PathVariable Long id) {
+        List<EmployeeResponse> subordinates = employeeService.getSubordinates(id);
+        return ResponseEntity.ok(subordinates);
+    }
+
+    /**
+     * 특정 직원의 상급자 조회
+     * GET /employees/{id}/manager
+     */
+    @GetMapping("/{id}/manager")
+    public ResponseEntity<EmployeeResponse> getManager(@PathVariable Long id) {
+        EmployeeResponse manager = employeeService.getManager(id);
+        return ResponseEntity.ok(manager);
+    }
+
+    /**
+     * 부서별 직원 목록 조회
+     * GET /employees/department/{department}
+     */
+    @GetMapping("/department/{department}")
+    public ResponseEntity<List<EmployeeResponse>> getEmployeesByDepartment(@PathVariable String department) {
+        List<EmployeeResponse> employees = employeeService.getEmployeesByDepartment(department);
+        return ResponseEntity.ok(employees);
+    }
+
+    /**
+     * 상태별 직원 목록 조회
+     * GET /employees/status/{status}
+     */
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<EmployeeResponse>> getEmployeesByStatus(@PathVariable String status) {
+        List<EmployeeResponse> employees = employeeService.getEmployeesByStatus(status);
+        return ResponseEntity.ok(employees);
     }
 }

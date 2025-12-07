@@ -18,4 +18,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     // 부서 및 직책별 직원 조회
     List<Employee> findByDepartmentAndPosition(String department, String position);
+
+    // 조직도 관련 메서드
+    // 특정 상급자의 부하 직원 조회
+    List<Employee> findByManagerId(Long managerId);
+
+    // 상급자가 없는 최상위 직원 조회 (CEO 등)
+    List<Employee> findByManagerIdIsNull();
+
+    // 상태별 직원 조회
+    List<Employee> findByStatus(String status);
 }
