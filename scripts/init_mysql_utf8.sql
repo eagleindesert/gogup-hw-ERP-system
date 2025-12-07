@@ -1,8 +1,4 @@
--- ERP Employee Service Database Initialization Script
-
--- Set character encoding
-SET NAMES utf8mb4;
-SET CHARACTER SET utf8mb4;
+﻿-- ERP Employee Service Database Initialization Script
 
 -- Create database if not exists with UTF-8 charset
 CREATE DATABASE IF NOT EXISTS erp_employee CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
