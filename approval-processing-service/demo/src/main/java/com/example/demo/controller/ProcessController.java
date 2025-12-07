@@ -42,8 +42,10 @@ public class ProcessController {
             @PathVariable("approverId") Long approverId,
             @PathVariable("requestId") Long requestId,
             @RequestBody ProcessRequest request) {
-        log.info("결재 처리 요청: approverId={}, requestId={}, status={}", approverId, requestId, request.getStatus());
-        ProcessResponse response = service.processApproval(approverId, requestId, request.getStatus());
+        log.info("결재 처리 요청: approverId={}, requestId={}, status={}, comment={}", 
+                approverId, requestId, request.getStatus(), request.getComment());
+        ProcessResponse response = service.processApproval(
+                approverId, requestId, request.getStatus(), request.getComment());
         return ResponseEntity.ok(response);
     }
 }

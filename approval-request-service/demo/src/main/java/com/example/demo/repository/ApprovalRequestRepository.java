@@ -1,11 +1,12 @@
 package com.example.demo.repository;
 
-import com.example.demo.document.ApprovalRequestDocument;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.demo.document.ApprovalRequestDocument;
 
 @Repository
 public interface ApprovalRequestRepository extends MongoRepository<ApprovalRequestDocument, String> {
@@ -15,4 +16,6 @@ public interface ApprovalRequestRepository extends MongoRepository<ApprovalReque
     Optional<ApprovalRequestDocument> findTopByOrderByRequestIdDesc();
 
     List<ApprovalRequestDocument> findByFinalStatus(String finalStatus);
+
+    List<ApprovalRequestDocument> findByRequesterId(Long requesterId);
 }

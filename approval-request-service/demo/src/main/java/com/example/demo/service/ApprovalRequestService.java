@@ -102,18 +102,20 @@ public class ApprovalRequestService {
     }
 
     /**
-     * 결재 결과 처리 (gRPC 서버에서 호출)
+     * 결재 결과 처리 (Kafka Consumer에서 호출)
      */
-    public void processApprovalResult(Long requestId, int step, Long approverId, String status) {
+    public void processApprovalResult(Long requestId, int step, Long approverId, String status, String comment) {
         ApprovalRequestDocument document = approvalRequestRepository.findByRequestId(requestId)
                 .orElseThrow(() -> new ApprovalNotFoundException(requestId));
 
-        // 1. 해당 단계의 상태 업데이트
+        // 1. 해당 단계의 상태 및 의견 업데이트
         LocalDateTime now = LocalDateTime.now();
         for (ApprovalStep s : document.getSteps()) {
             if (s.getStep() == step && s.getApproverId().equals(approverId)) {
                 s.setStatus(status);
+                s.setComment(comment);  // 의견 저장
                 s.setUpdatedAt(now);
+                log.info("결재 의견 저장: requestId={}, step={}, comment={}", requestId, step, comment);
                 break;
             }
         }

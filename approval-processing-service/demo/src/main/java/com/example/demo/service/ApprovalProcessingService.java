@@ -37,8 +37,9 @@ public class ApprovalProcessingService {
      * 결재 처리 (승인/반려)
      * Kafka 메시지 전송 후 In-Memory에서 제거
      */
-    public ProcessResponse processApproval(Long approverId, Long requestId, String status) {
-        log.info("결재 처리 시작: approverId={}, requestId={}, status={}", approverId, requestId, status);
+    public ProcessResponse processApproval(Long approverId, Long requestId, String status, String comment) {
+        log.info("결재 처리 시작: approverId={}, requestId={}, status={}, comment={}", 
+                approverId, requestId, status, comment);
 
         // 상태값 검증
         if (!"approved".equals(status) && !"rejected".equals(status)) {
@@ -60,9 +61,10 @@ public class ApprovalProcessingService {
                 .map(PendingApproval.StepInfo::getStep)
                 .orElse(1);
 
-        // 1. Kafka로 Approval Request Service에 결과 전송
-        approvalResultProducer.sendApprovalResult(requestId, currentStep, approverId, status);
-        log.info("Kafka 결재 결과 전송: requestId={}, step={}, status={}", requestId, currentStep, status);
+        // 1. Kafka로 Approval Request Service에 결과 전송 (의견 포함)
+        approvalResultProducer.sendApprovalResult(requestId, currentStep, approverId, status, comment);
+        log.info("Kafka 결재 결과 전송: requestId={}, step={}, status={}, comment={}", 
+                requestId, currentStep, status, comment);
         
         // 2. In-Memory에서 해당 결재자의 대기 항목 제거
         repository.removePendingApproval(approverId, requestId);

@@ -24,18 +24,20 @@ public class ApprovalResultConsumer {
             containerFactory = "approvalResultListenerContainerFactory"
     )
     public void consumeApprovalResult(ApprovalResultMessage message) {
-        log.info("Kafka 메시지 수신: topic={}, requestId={}, step={}, status={}",
+        log.info("Kafka 메시지 수신: topic={}, requestId={}, step={}, status={}, comment={}",
                 KafkaConfig.TOPIC_APPROVAL_RESULT,
                 message.getRequestId(),
                 message.getStep(),
-                message.getStatus());
+                message.getStatus(),
+                message.getComment());
 
         try {
             approvalRequestService.processApprovalResult(
                     message.getRequestId(),
                     message.getStep(),
                     message.getApproverId(),
-                    message.getStatus()
+                    message.getStatus(),
+                    message.getComment()
             );
             log.info("결재 결과 처리 완료: requestId={}", message.getRequestId());
         } catch (Exception e) {

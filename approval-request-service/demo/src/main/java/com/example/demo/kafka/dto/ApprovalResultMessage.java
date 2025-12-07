@@ -18,4 +18,5 @@ public class ApprovalResultMessage {
     private int step;
     private Long approverId;
     private String status;  // approved or rejected
+    private String comment; // 결재 의견/코멘트
 }

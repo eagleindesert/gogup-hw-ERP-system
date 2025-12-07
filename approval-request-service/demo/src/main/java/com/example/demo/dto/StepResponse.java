@@ -17,6 +17,7 @@ public class StepResponse {
     private Integer step;
     private Long approverId;
     private String status;
+    private String comment;
     private LocalDateTime updatedAt;
 
     public static StepResponse from(ApprovalStep step) {
@@ -24,6 +25,7 @@ public class StepResponse {
                 .step(step.getStep())
                 .approverId(step.getApproverId())
                 .status(step.getStatus())
+                .comment(step.getComment())
                 .updatedAt(step.getUpdatedAt())
                 .build();
     }

@@ -23,12 +23,13 @@ public class ApprovalResultProducer {
     /**
      * 결재 결과를 Kafka로 전송
      */
-    public void sendApprovalResult(Long requestId, int step, Long approverId, String status) {
+    public void sendApprovalResult(Long requestId, int step, Long approverId, String status, String comment) {
         ApprovalResultMessage message = ApprovalResultMessage.builder()
                 .requestId(requestId)
                 .step(step)
                 .approverId(approverId)
                 .status(status)
+                .comment(comment)
                 .build();
 
         String key = String.valueOf(requestId);
