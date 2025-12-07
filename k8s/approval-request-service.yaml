@@ -1,0 +1,62 @@
+# =============================================================
+# Approval Request Service Deployment & Service
+# =============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: approval-request-service
+  namespace: erp-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: approval-request-service
+  template:
+    metadata:
+      labels:
+        app: approval-request-service
+    spec:
+      containers:
+      - name: approval-request-service
+        image: eagleindesert/approval-request-service:latest
+        imagePullPolicy: Always
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "docker"
+        ports:
+        - containerPort: 8082
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: approval-request-service
+  namespace: erp-system
+spec:
+  selector:
+    app: approval-request-service
+  ports:
+  - port: 8082
+    targetPort: 8082
+  type: LoadBalancer

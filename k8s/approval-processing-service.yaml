@@ -1,0 +1,62 @@
+# =============================================================
+# Approval Processing Service Deployment & Service
+# =============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: approval-processing-service
+  namespace: erp-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: approval-processing-service
+  template:
+    metadata:
+      labels:
+        app: approval-processing-service
+    spec:
+      containers:
+      - name: approval-processing-service
+        image: eagleindesert/approval-processing-service:latest
+        imagePullPolicy: Always
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "docker"
+        ports:
+        - containerPort: 8083
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: approval-processing-service
+  namespace: erp-system
+spec:
+  selector:
+    app: approval-processing-service
+  ports:
+  - port: 8083
+    targetPort: 8083
+  type: LoadBalancer

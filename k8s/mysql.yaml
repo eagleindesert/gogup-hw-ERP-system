@@ -1,0 +1,114 @@
+# =============================================================
+# MySQL Database Deployment & Service
+# =============================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: erp-system
+data:
+  init.sql: |
+    -- Set character encoding
+    SET NAMES utf8mb4;
+    SET CHARACTER SET utf8mb4;
+
+    -- Create database if not exists with UTF-8 charset
+    CREATE DATABASE IF NOT EXISTS erp_employee CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    USE erp_employee;
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: erp-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: erp-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        args:
+          - "--character-set-server=utf8mb4"
+          - "--collation-server=utf8mb4_unicode_ci"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        - name: MYSQL_DATABASE
+          value: "erp_employee"
+        - name: MYSQL_USER
+          value: "erp_user"
+        - name: MYSQL_PASSWORD
+          value: "erp_password"
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        - name: mysql-init
+          mountPath: /docker-entrypoint-initdb.d
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+            - -u
+            - root
+            - -proot
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+            - -u
+            - root
+            - -proot
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      - name: mysql-init
+        configMap:
+          name: mysql-init-script
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: erp-system
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP
