@@ -1,4 +1,4 @@
-# 고급프로그래밍실습 과제
+﻿# 고급프로그래밍실습 과제
 ## ERP 결재 시스템 프로젝트 보고서
  
 **단국대학교 소프트웨어학과**  
@@ -1276,7 +1276,7 @@ docker compose logs -f notification-service
 docker compose logs -f
 ```
 
-![Docker Compose 실행 화면](images/8-2.png)
+![Docker Compose 실행 화면](docs/images/8-2.png)
 
 #### **8.2.3 Health Check 확인**
 
@@ -1410,10 +1410,10 @@ curl "http://localhost:8081/employees?position=백엔드팀장"
 - ✅ 필터링 조건 정확성
 
 - 전체 직원 목록 조회 화면
-![전체 직원 목록 조회](images/9-1-1_1.png)
+![전체 직원 목록 조회](docs/images/9-1-1_1.png)
 
 - 개발팀 직원 목록 조회 화면
-![특정 직원 조회](images/9-1-1_2.png)
+![특정 직원 조회](docs/images/9-1-1_2.png)
 
 #### **9.1.2 조직도 조회 (Employee Service)**
 
@@ -1441,10 +1441,10 @@ curl http://localhost:8081/employees/5/manager
 - ✅ subordinates 배열 재귀적 구조
 
 - 조직도 조회 화면
-![전체 조직도 조회](images/9-1-2_1.png)
+![전체 조직도 조회](docs/images/9-1-2_1.png)
 
 - 5번 직원의 상사 조회 화면
-![부하 직원 조회](images/9-1-2_2.png)
+![부하 직원 조회](docs/images/9-1-2_2.png)
 
 ### 9.2 결재 요청 생성 테스트
 
@@ -1486,7 +1486,7 @@ docker exec -it erp-kafka kafka-console-consumer `
   --from-beginning
 ```
 - 단일 결재자 결재 요청 화면
-![단일 결재자 결재 요청](images/9-2-1.png)
+![단일 결재자 결재 요청](docs/images/9-2-1.png)
 
 #### **9.2.2 다단계 결재 요청 (3단계)**
 
@@ -1520,7 +1520,7 @@ curl -X POST http://localhost:8082/approvals `
 - ✅ finalStatus: "in_progress"
 
 - 다단계 결재 요청 화면
-![다단계 결재 요청](images/9-2-2.png)
+![다단계 결재 요청](docs/images/9-2-2.png)
 
 #### **9.2.3 유효성 검증 테스트**
 
@@ -1558,7 +1558,7 @@ curl -X POST http://localhost:8082/approvals `
 - ✅ 명확한 에러 메시지
 
 - 직원이 존재하지 않을 시 유효성 검증 테스트 화면
-![유효성 검증 테스트](images/9-2-3.png)
+![유효성 검증 테스트](docs/images/9-2-3.png)
 
 ### 9.3 결재 승인 테스트
 
@@ -1618,10 +1618,10 @@ curl http://localhost:8082/approvals/3
 - ✅ 대기 목록에서 제거
 
 - 단일 단계 승인 대기 화면
-![단일 단계 승인 - 대기 목록](images/9-3-1_1.png)
+![단일 단계 승인 - 대기 목록](docs/images/9-3-1_1.png)
 
 - 단일 단계 결재 처리 화면
-![단일 단계 승인 - 결과](images/9-3-1_2.png)
+![단일 단계 승인 - 결과](docs/images/9-3-1_2.png)
 
 #### **9.3.2 다단계 승인 (중간 승인)**
 
@@ -1698,13 +1698,13 @@ curl http://localhost:8082/approvals/4
 - ✅ 결재자 2번 대기 목록에 유지
 
 - 다단계 승인 결재 생성
-![다단계 승인 - 요청 생성](images/9-3-2_1.png)
+![다단계 승인 - 요청 생성](docs/images/9-3-2_1.png)
 
 - 7번 id 직원의 4번 결재 승인
-![다단계 승인 - 1단계 승인](images/9-3-2_2.png)
+![다단계 승인 - 1단계 승인](docs/images/9-3-2_2.png)
 
 - 4번 결재의 경과 확인
-![다단계 승인 - 2단계 대기 목록](images/9-3-2_3.png)
+![다단계 승인 - 2단계 대기 목록](docs/images/9-3-2_3.png)
 
 #### **9.3.3 전체 단계 순차 승인**
 
@@ -1772,7 +1772,7 @@ curl http://localhost:8082/approvals/4
 - ✅ 모든 결재자 대기 목록에서 제거
 
 - 현재 모든 승인이 완료되어 approved 된 상태
-![전체 단계 순차 승인](images/9-3-3.png)
+![전체 단계 순차 승인](docs/images/9-3-3.png)
 
 ### 9.4 결재 반려 테스트
 
@@ -1838,10 +1838,10 @@ curl http://localhost:8082/approvals/5
 - ✅ 반려 사유(comment) 저장
 
 - 결재자가 결재 반려함
-![첫 번째 단계 반려 - 요청](images/9-4-1_1.png)
+![첫 번째 단계 반려 - 요청](docs/images/9-4-1_1.png)
 
 - rejected된 3번 결재
-![첫 번째 단계 반려 - 결과](images/9-4-1_2.png)
+![첫 번째 단계 반려 - 결과](docs/images/9-4-1_2.png)
 
 #### **9.4.2 중간 단계에서 반려**
 
@@ -1923,7 +1923,7 @@ curl http://localhost:8083/process/1
 - ✅ 반려 즉시 전체 프로세스 종료
 
 - 중간 단계가 반려되어 결재가 더이상 이루어지지 않고 rejected됨
-![중간 단계 반려](images/9-4-2.png)
+![중간 단계 반려](docs/images/9-4-2.png)
 
 ### 9.5 동시성 테스트
 
@@ -1994,13 +1994,13 @@ curl http://localhost:8083/process/5
 - ✅ 동시 요청 시 응답 시간 측정
 
 - powershell을 이용해 병렬 처리 생성
-![동시성 테스트 - 요청 생성](images/9-5-1_1.png)
+![동시성 테스트 - 요청 생성](docs/images/9-5-1_1.png)
 
 - 동시에 3개 승인과, 승인된 3개의 결재
-![동시성 테스트 - 대기 목록](images/9-5-1_2.png)
+![동시성 테스트 - 대기 목록](docs/images/9-5-1_2.png)
 
 - 아직 처리되지 않은 2개의 결재, 즉 정상 작동
-![동시성 테스트 - 처리 결과](images/9-5-1_3.png)
+![동시성 테스트 - 처리 결과](docs/images/9-5-1_3.png)
 
 #### **9.5.2 Kafka 메시지 순서 보장**
 
@@ -2036,10 +2036,10 @@ docker exec -it erp-kafka kafka-console-consumer `
 - ✅ In-Memory 저장소에 모두 추가됨
 
 - 결재 10개를 순차 생성하고 잘 생성되었는지 확인
-![Kafka 메시지 순서 - 생성](images/9-5-2_1.png)
+![Kafka 메시지 순서 - 생성](docs/images/9-5-2_1.png)
 
 - kafka에 모든 메시지가 잘 반영되었는지 확인
-![Kafka 메시지 순서 - 확인](images/9-5-2_2.png)
+![Kafka 메시지 순서 - 확인](docs/images/9-5-2_2.png)
 
 ### 9.6 WebSocket 실시간 알림 테스트
 
@@ -2080,10 +2080,10 @@ curl -X POST http://localhost:8083/process/5/[requestId] `
 - ✅ finalResult 값 확인 (approved/rejected/in_progress)
 
 - 결재가 승인되었을때 브라우저 창
-![WebSocket 연결 - 최종 승인](images/9-6-1_1.png)
+![WebSocket 연결 - 최종 승인](docs/images/9-6-1_1.png)
 - **만약 결재 Step이 남아있을 경우**
 만약 결제 했지만 남은 Step이 존재한다면 그림과 같이 결과가 생긴다
-![WebSocket 연결 - 중간 단계](images/9-6-1_2.png)
+![WebSocket 연결 - 중간 단계](docs/images/9-6-1_2.png)
 
 #### **9.6.2 다중 클라이언트 테스트**
 
@@ -2127,9 +2127,9 @@ curl -X POST http://localhost:8083/process/5/[requestId] `
 - ✅ 직원 25는 알림 수신 안 함
 - ✅ 세션 격리 확인
 
-![다중 클라이언트 - 직원 15](images/9-6-2_1.png)
+![다중 클라이언트 - 직원 15](docs/images/9-6-2_1.png)
 
-![다중 클라이언트 - 직원 20](images/9-6-2_2.png)
+![다중 클라이언트 - 직원 20](docs/images/9-6-2_2.png)
 
 ### 9.7 통계 기능 테스트
 
@@ -2169,7 +2169,7 @@ curl http://localhost:8082/statistics
 - ✅ 요청자별 집계
 
 - 통계 화면
-![전체 통계 조회](images/9-7-1.png)
+![전체 통계 조회](docs/images/9-7-1.png)
 
 #### **9.7.2 요청자별 통계 조회**
 
@@ -2198,7 +2198,7 @@ curl http://localhost:8082/statistics/requester/20
 - ✅ 비율 계산 정확성
 
 - 15번 직원의 통계
-![요청자별 통계 조회](images/9-7-2.png)
+![요청자별 통계 조회](docs/images/9-7-2.png)
 
 ### 9.8 에러 처리 및 복구 테스트
 
@@ -2244,9 +2244,9 @@ curl -X POST http://localhost:8082/approvals `
 - ✅ 로그에는 기록이 됨
 - 🔧 추후 개선 필요
 
-![서비스 장애 테스트](images/9-8-1_1.png)
+![서비스 장애 테스트](docs/images/9-8-1_1.png)
 
-![서비스 복구 테스트](images/9-8-1_2.png)
+![서비스 복구 테스트](docs/images/9-8-1_2.png)
 
 #### **9.8.2 Kafka 장애 복구**
 
@@ -2341,7 +2341,7 @@ Measure-Command {
 - ✅ Kafka 처리량
 - ✅ In-Memory 저장소 성능
 
-![대량 결재 요청 처리](images/9-9-1.png)
+![대량 결재 요청 처리](docs/images/9-9-1.png)
 
 #### **9.9.2 조회 성능 테스트**
 
@@ -2370,7 +2370,7 @@ Measure-Command {
 - ✅ 페이징 필요성 검토
 
 - 특정 결재 조회 성능 예시 
-![조회 성능 테스트](images/9-9-2.png)
+![조회 성능 테스트](docs/images/9-9-2.png)
 
 ### 9.10 종합 시나리오
 
@@ -2440,22 +2440,22 @@ curl http://localhost:8082/approvals/[requestId]
 - ✅ 모든 서비스 연동 확인
 
 1. 결재 요청 생성
-![종합 시나리오 1 - 요청 생성](images/9-10-1_1.png)
+![종합 시나리오 1 - 요청 생성](docs/images/9-10-1_1.png)
 
 2. 팀장 승인
-![종합 시나리오 2](images/9-10-1_2.png)
+![종합 시나리오 2](docs/images/9-10-1_2.png)
 
 3. CTO 승인
-![종합 시나리오 3](images/9-10-1_3.png)
+![종합 시나리오 3](docs/images/9-10-1_3.png)
 
 4. CEO 승인
-![종합 시나리오 4](images/9-10-1_4.png)
+![종합 시나리오 4](docs/images/9-10-1_4.png)
 
 5. 요청자의 브라우저 알림
-![종합 시나리오 5](images/9-10-1_5.png)
+![종합 시나리오 5](docs/images/9-10-1_5.png)
 
 6. 최종 결과
-![종합 시나리오 6 - 최종 결과](images/9-10-1_6.png)
+![종합 시나리오 6 - 최종 결과](docs/images/9-10-1_6.png)
 
 ---
 
@@ -2510,11 +2510,11 @@ mysql:
 
 **결과**: 한글 데이터 정상적으로 저장 및 조회 가능
 
-![MySQL 인코딩 문제 - 발생](images/11-1_1.png)
+![MySQL 인코딩 문제 - 발생](docs/images/11-1_1.png)
 
-![MySQL 인코딩 문제 - 해결 과정](images/11-1_2.png)
+![MySQL 인코딩 문제 - 해결 과정](docs/images/11-1_2.png)
 
-![MySQL 인코딩 문제 - 해결 완료](images/11-1_3.png)
+![MySQL 인코딩 문제 - 해결 완료](docs/images/11-1_3.png)
 
 ---
 
@@ -2899,4 +2899,5 @@ Level 1: CEO (김대표)
 | **조직도** | 없음 | 계층형 조직도 조회 | 결재 경로 설계 지원 |
 
 ---
+
 
